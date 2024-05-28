@@ -288,7 +288,7 @@ string regular_expression_syntax_check(const string& expression) {
     stack<char> parentheses;
     bool last_is_operator = true;  // Start true to prevent leading '|'
     bool last_is_letter = false;
-    int consecutive_stars = 0;  // Counter for consecutive asterisks
+    int consecutive_stars = 0;  // Counter for consecutive stars
 
     for (int i = 0; i < expression.length(); i++) {
         char c = expression[i];
@@ -320,7 +320,7 @@ string regular_expression_syntax_check(const string& expression) {
             case '*':
                 consecutive_stars++;
                 if (last_is_operator || consecutive_stars > 1) {
-                    return "Invalid placement of '*': Consecutive asterisks are not allowed.";
+                    return "Invalid placement of '*': Consecutive stars are not allowed.";
                 }
                 // Allow '*' after a letter or after ')'
                 if (!last_is_letter && (parentheses.empty() || expression[i-1] != ')')) {
