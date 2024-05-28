@@ -373,55 +373,44 @@ void clear() {
 
 int initial_state;           // Initial state index in the NFA
 
-// Function to calculate the epsilon closure of a set of states
-std::set<int> epsilon_closure(std::set<int> states) {
-    std::set<int> closure = states;
-    std::vector<int> stack(states.begin(), states.end());
+/std::set<int> epsilon_closure(const std::set<int>& start_states) {
+    std::set<int> closure = start_states;
+    std::vector<int> stack(start_states.begin(), start_states.end());
 
     while (!stack.empty()) {
-        int top = stack.back();
+        int state = stack.back();
         stack.pop_back();
-        for (int eps_state : nfa[top].e) {
+        for (int eps_state : nfa[state].epsilon) {
             if (closure.insert(eps_state).second) {
                 stack.push_back(eps_state);
             }
         }
     }
-
     return closure;
 }
 
-// Matching function
 bool re_match_check(const std::string& test_string) {
-    // Calculate the initial epsilon-closure from the initial state
     std::set<int> current_states = epsilon_closure({initial_state});
 
     for (char c : test_string) {
-        if (c < 'a' || c > 'z') { // Validate character
-            return false;
-        }
-
         std::set<int> next_states;
-        // Transition based on the character and calculate new states
         for (int state : current_states) {
-            const auto& transitions = nfa[state].a[c - 'a'];
-            for (int next : transitions) {
-                next_states.insert(next);
+            if (c >= 'a' && c <= 'z') {  // Ensure valid character range
+                for (int next_state : nfa[state].transitions[c - 'a']) {
+                    next_states.insert(next_state);
+                }
             }
         }
-
-        // Calculate epsilon-closure for the states reached by the current character
-        current_states = epsilon_closure(next_states);
+        current_states = epsilon_closure(next_states);  // Recalculate epsilon closure after consuming character
     }
 
-    // Check if any current states are final states
+    // Check if any final states are in the current set of states
     for (int state : current_states) {
-        if (nfa[state].f) {
-            return true;
+        if (nfa[state].is_final) {
+            return true;  // String matches the regex
         }
     }
-
-    return false;
+    return false;  // No final states reached, string does not match
 }
 
 void solve() {
