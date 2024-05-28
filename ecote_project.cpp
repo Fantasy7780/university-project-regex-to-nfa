@@ -5,6 +5,7 @@
 #include <stack>
 #include <queue>
 #include <iostream>
+#include <regex>
 
 using namespace std;
 
@@ -35,84 +36,89 @@ struct production{
 
 string syntax_info = "";
 
-/***************************** Print NFA ****************************/
+string last_regular_expression = "";
 
-void print_nfa() {
-    cout << "Regular expression to NFA: \n";
-    cout << "States = {";
-    for (int i = 0; i < nfa.size(); i++) {
-        if (i)  
-        cout << ", ";
-        cout << char(i + 'A');
-    }
-    cout << "};\n";
-    cout << "Inputs = {";
-    auto it = alphabet.begin();
-    cout << *it, it++;
-    for (; it != alphabet.end(); it++) {
-        cout << ", " << *it;
-    }
-    cout << "};\n";
 
-    vector<production> ans;
-    set<int> in; //In to the node
-    for (int i = 0; i < nfa.size(); i++) {
-        bool &f = nfa[i].f;
-        for (int j = 0; j < 26; j++) {
-            if (nfa[i].a[j].size() == 0)    
-                continue;
-            f |= 1;
-            for (auto k : nfa[i].a[j]) {
-                ans.push_back({i, j, k});
-                in.insert(k);
-            } 
+/***************************** RE Syntax  ****************************/
+
+string regular_expression_syntax_check(const string& expression) {
+    stack<char> parentheses;
+    bool last_is_operator = true;  // Start true to prevent leading '|'
+    bool last_is_letter = false;
+    int consecutive_stars = 0;  // Counter for consecutive stars
+
+    for (int i = 0; i < expression.length(); i++) {
+        char c = expression[i];
+
+        switch (c) {
+            case '(':
+                if (!last_is_operator && !last_is_letter) {
+                    return "Invalid placement of '(': It must follow an operator or start the expression.";
+                }
+                parentheses.push(c);
+                last_is_operator = true;
+                last_is_letter = false;
+                consecutive_stars = 0;
+                break;
+
+            case ')':
+                if (last_is_operator || parentheses.empty()) {
+                    if (parentheses.empty()) {
+                        return "Unmatched ')': No corresponding opening parenthesis.";
+                    }
+                    return "Invalid placement of ')': It cannot immediately follow an operator.";
+                }
+                parentheses.pop();
+                last_is_operator = false;
+                last_is_letter = true;
+                consecutive_stars = 0;
+                break;
+
+            case '*':
+                consecutive_stars++;
+                if (last_is_operator || consecutive_stars > 1) {
+                    return "Invalid placement of '*': Consecutive stars are not allowed.";
+                }
+                // Allow '*' after a letter or after ')'
+                if (!last_is_letter && (parentheses.empty() || expression[i-1] != ')')) {
+                    return "Invalid placement of '*': It can only follow a letter or a closed parenthesis.";
+                }
+                last_is_operator = true;
+                last_is_letter = false;
+                break;
+
+            case '|':
+                if (last_is_operator || i == 0 || i == expression.length() - 1) {
+                    return "Invalid placement of '|': It cannot be first, last, or follow another operator.";
+                }
+                last_is_operator = true;
+                last_is_letter = false;
+                consecutive_stars = 0;
+                break;
+
+            default:
+                if (c < 'a' || c > 'z') {
+                    return "Invalid character: Only lowercase letters 'a' to 'z' are allowed.";
+                }
+                last_is_operator = false;
+                last_is_letter = true;
+                consecutive_stars = 0;  // Reset on encountering a valid character
+                break;
         }
-        if (nfa[i].e.size() == 0)   
-            continue;
-        for (auto j : nfa[i].e){
-            ans.push_back({i, -1, j});
-            in.insert(j);
-        }     
-        f |= 1;
     }
 
-    cout << "Transition functions: ";
-    for (int i = 0; i < ans.size(); i++) {
-        if (i)  cout << ", ";
-        cout << "f(";
-        cout << char(ans[i].a + 'A');
-        cout << ", ";
-        if (ans[i].b == -1) cout << "ε";
-        else    cout << char(ans[i].b + 'a');
-        cout << ") = ";
-        cout << char(ans[i].c + 'A');
+    if (!parentheses.empty()) {
+        return "Unmatched '(': Not all opening parentheses have a matching closing parenthesis.";
     }
-    cout << ";\n";
-
-    // If there's no in it's the start
-    for (int i = 0; i < nfa.size(); i++) {
-        if (!in.count(i)) {
-            cout << "Initial state = " <<char(i + 'A') << ";\n";
-            break;
-        }
+    if (last_is_operator && expression.back() != '*') {
+        return "Expression cannot end with an operator.";
     }
 
-    cout << "Final state = {";
-    vector<int> final;
-    for (int i = 0; i < nfa.size(); i++) {
-        if (!nfa[i].f)    
-            final.push_back(i), accepted.insert(i);
-    }
-    for (int i = 0; i < final.size(); i++) {
-        if (i)
-            cout << ", ";
-        cout << char(final[i] + 'A');
-    }
-    cout << "};\n";
-    cout << endl;
+    return "The regular expression is valid.";
 }
 
 /***************************** RE to NFA ****************************/
+
 
 // Priority of stack 
 int priority(char c) {
@@ -126,6 +132,25 @@ int priority(char c) {
         default:
             return 0;
     }
+}
+
+// Insert hidden concatenations
+string insert_concatination(string regular_expression) {
+    string ret = "";
+    char c; 
+    char c2;
+    for (int i = 0; i < regular_expression.size(); i++) {
+        c = regular_expression[i];
+        if (i + 1 < regular_expression.size()) {
+            c2 = regular_expression[i + 1];
+            ret += c;
+            if (c != '(' && c2 != ')' && c != '|' && c2 != '|' && c2 != '*') {
+                ret += '.';
+            }
+        }
+    }
+    ret += regular_expression[regular_expression.size() - 1];
+    return ret;
 }
 
 string regular_expression_to_postfix(string regular_expression) {
@@ -163,24 +188,6 @@ string regular_expression_to_postfix(string regular_expression) {
     return postfix;
 }
 
-// Insert hidden concatenations
-string insert_concatination(string regular_expression) {
-    string ret = "";
-    char c; 
-    char c2;
-    for (int i = 0; i < regular_expression.size(); i++) {
-        c = regular_expression[i];
-        if (i + 1 < regular_expression.size()) {
-            c2 = regular_expression[i + 1];
-            ret += c;
-            if (c != '(' && c2 != ')' && c != '|' && c2 != '|' && c2 != '*') {
-                ret += '.';
-            }
-        }
-    }
-    ret += regular_expression[regular_expression.size() - 1];
-    return ret;
-}
 
 // Process characters
 void character(int i) {
@@ -282,82 +289,81 @@ void postfix_to_nfa(string postfix) {
     }
 }
 
-/***************************** RE Syntax  ****************************/
+/***************************** Print NFA ****************************/
 
-string regular_expression_syntax_check(const string& expression) {
-    stack<char> parentheses;
-    bool last_is_operator = true;  // Start true to prevent leading '|'
-    bool last_is_letter = false;
-    int consecutive_stars = 0;  // Counter for consecutive stars
+void print_nfa() {
+    cout << "Regular expression to NFA: \n";
+    cout << "States = {";
+    for (int i = 0; i < nfa.size(); i++) {
+        if (i)  
+        cout << ", ";
+        cout << char(i + 'A');
+    }
+    cout << "};\n";
+    cout << "Inputs = {";
+    auto it = alphabet.begin();
+    cout << *it, it++;
+    for (; it != alphabet.end(); it++) {
+        cout << ", " << *it;
+    }
+    cout << "};\n";
 
-    for (int i = 0; i < expression.length(); i++) {
-        char c = expression[i];
+    vector<production> ans;
+    set<int> in; //In to the node
+    for (int i = 0; i < nfa.size(); i++) {
+        bool &f = nfa[i].f;
+        for (int j = 0; j < 26; j++) {
+            if (nfa[i].a[j].size() == 0)    
+                continue;
+            f |= 1;
+            for (auto k : nfa[i].a[j]) {
+                ans.push_back({i, j, k});
+                in.insert(k);
+            } 
+        }
+        if (nfa[i].e.size() == 0)  
+            continue;
+        for (auto j : nfa[i].e){
+            ans.push_back({i, -1, j});
+            in.insert(j);
+        }     
+        f |= 1;
+    }
 
-        switch (c) {
-            case '(':
-                if (!last_is_operator && !last_is_letter) {
-                    return "Invalid placement of '(': It must follow an operator or start the expression.";
-                }
-                parentheses.push(c);
-                last_is_operator = true;
-                last_is_letter = false;
-                consecutive_stars = 0;
-                break;
+    cout << "Transition functions: ";
+    for (int i = 0; i < ans.size(); i++) {
+        if (i)  cout << ", ";
+        cout << "f(";
+        cout << char(ans[i].a + 'A');
+        cout << ", ";
+        if (ans[i].b == -1) cout << "ε";
+        else    cout << char(ans[i].b + 'a');
+        cout << ") = ";
+        cout << char(ans[i].c + 'A');
+    }
+    cout << ";\n";
 
-            case ')':
-                if (last_is_operator || parentheses.empty()) {
-                    if (parentheses.empty()) {
-                        return "Unmatched ')': No corresponding opening parenthesis.";
-                    }
-                    return "Invalid placement of ')': It cannot immediately follow an operator.";
-                }
-                parentheses.pop();
-                last_is_operator = false;
-                last_is_letter = true;
-                consecutive_stars = 0;
-                break;
-
-            case '*':
-                consecutive_stars++;
-                if (last_is_operator || consecutive_stars > 1) {
-                    return "Invalid placement of '*': Consecutive stars are not allowed.";
-                }
-                // Allow '*' after a letter or after ')'
-                if (!last_is_letter && (parentheses.empty() || expression[i-1] != ')')) {
-                    return "Invalid placement of '*': It can only follow a letter or a closed parenthesis.";
-                }
-                last_is_operator = true;
-                last_is_letter = false;
-                break;
-
-            case '|':
-                if (last_is_operator || i == 0 || i == expression.length() - 1) {
-                    return "Invalid placement of '|': It cannot be first, last, or follow another operator.";
-                }
-                last_is_operator = true;
-                last_is_letter = false;
-                consecutive_stars = 0;
-                break;
-
-            default:
-                if (c < 'a' || c > 'z') {
-                    return "Invalid character: Only lowercase letters 'a' to 'z' are allowed.";
-                }
-                last_is_operator = false;
-                last_is_letter = true;
-                consecutive_stars = 0;  // Reset on encountering a valid character
-                break;
+    // If there's no in it's the start
+    for (int i = 0; i < nfa.size(); i++) {
+        if (!in.count(i)) {
+            cout << "Initial state = " <<char(i + 'A') << ";\n";
+            break;
         }
     }
 
-    if (!parentheses.empty()) {
-        return "Unmatched '(': Not all opening parentheses have a matching closing parenthesis.";
+    cout << "Final state = {";
+    vector<int> final;
+    for (int i = 0; i < nfa.size(); i++) {
+        if (!nfa[i].f)    
+            final.push_back(i), accepted.insert(i);
     }
-    if (last_is_operator && expression.back() != '*') {
-        return "Expression cannot end with an operator.";
+    for (int i = 0; i < final.size(); i++) {
+        if (i)
+            cout << ", ";
+        cout << char(final[i] + 'A');
     }
-
-    return "The regular expression is valid.";
+    cout << "};\n";
+    cout << endl;
 }
 
 /***************************** Solve ****************************/
@@ -371,58 +377,21 @@ void clear() {
     nfa.clear();
 }
 
-int initial_state;           // Initial state index in the NFA
-
-/std::set<int> epsilon_closure(const std::set<int>& start_states) {
-    std::set<int> closure = start_states;
-    std::vector<int> stack(start_states.begin(), start_states.end());
-
-    while (!stack.empty()) {
-        int state = stack.back();
-        stack.pop_back();
-        for (int eps_state : nfa[state].epsilon) {
-            if (closure.insert(eps_state).second) {
-                stack.push_back(eps_state);
-            }
-        }
-    }
-    return closure;
-}
-
-bool re_match_check(const std::string& test_string) {
-    std::set<int> current_states = epsilon_closure({initial_state});
-
-    for (char c : test_string) {
-        std::set<int> next_states;
-        for (int state : current_states) {
-            if (c >= 'a' && c <= 'z') {  // Ensure valid character range
-                for (int next_state : nfa[state].transitions[c - 'a']) {
-                    next_states.insert(next_state);
-                }
-            }
-        }
-        current_states = epsilon_closure(next_states);  // Recalculate epsilon closure after consuming character
-    }
-
-    // Check if any final states are in the current set of states
-    for (int state : current_states) {
-        if (nfa[state].is_final) {
-            return true;  // String matches the regex
-        }
-    }
-    return false;  // No final states reached, string does not match
+bool re_match_check(string pattern, string test_string) {
+    regex regular_expression(pattern);  
+    return regex_match(test_string, regular_expression);  // Check if the test string matches the pattern
 }
 
 void solve() {
     clear();
-    string regular_expression = str;  // 'str' should already contain the regex from the '@' line
+    string regular_expression = str;  
     string postfix;
 
     // Remove "@" 
     regular_expression = regular_expression.substr(1);
     cout <<  "Regular expression: " << regular_expression << endl;
 
-    // Extract alphabet from the regular expression
+    // Alphabet the regular expression
     for (char i : regular_expression) {
         if (i >= 'a' && i <= 'z')   
             alphabet.insert(i);
@@ -450,9 +419,10 @@ int main() {
     while (cin >> str) {
         if (!str.empty() && str[0] == '@'){
             cout << "..........................................\n";
-            solve();
+            last_regular_expression = str.substr(1);
+            solve();        
         }else if (!str.empty() && str[0] != '@' && syntax_info == "The regular expression is valid."){
-            bool isMatch = re_match_check(str);  
+            bool isMatch = re_match_check(last_regular_expression, str);  
             cout << "String \"" << str << "\" matches: " << (isMatch ? "Yes" : "No") << endl;
         }
         

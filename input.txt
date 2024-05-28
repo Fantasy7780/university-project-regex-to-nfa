@@ -6,10 +6,22 @@ bbaa
 ababa
 ababab
 
+@a(ac
+
+@b)
+bba
+
+@a*b
+aaabb
+baa
+
+@(ab)*b
+
+@a|b*
+
 @Aaab*
 
 @a)(ab*
 
-@a)ac
-
 @a***
+
