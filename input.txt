@@ -1,0 +1,15 @@
+@a*b
+aaab
+bbaa
+
+@(ab)*ab*
+ababa
+ababab
+
+@Aaab*
+
+@a)(ab*
+
+@a)ac
+
+@a***
