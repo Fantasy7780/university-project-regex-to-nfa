@@ -20,8 +20,8 @@ Transition functions: f(A, a) = B, f(B, ε) = C, f(C, b) = D, f(D, ε) = A, f(D,
 Initial state = E;
 Final state = {L};
 
-String "ababa" matches: No
-String "ababab" matches: No
+String "ababa" matches: Yes
+String "ababab" matches: Yes
 ..........................................
 Regular expression: Aaab*
 Invalid character: Only lowercase letters 'a' to 'z' are allowed.
@@ -33,4 +33,4 @@ Regular expression: a)ac
 Unmatched ')': No corresponding opening parenthesis.
 ..........................................
 Regular expression: a***
-Invalid placement of '*': Consecutive asterisks are not allowed.
+Invalid placement of '*': Consecutive stars are not allowed.

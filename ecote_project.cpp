@@ -371,11 +371,58 @@ void clear() {
     nfa.clear();
 }
 
-bool re_match_check(const string& test_string) {
-    
-    return false; 
+int initial_state;           // Initial state index in the NFA
+
+// Function to calculate the epsilon closure of a set of states
+std::set<int> epsilon_closure(std::set<int> states) {
+    std::set<int> closure = states;
+    std::vector<int> stack(states.begin(), states.end());
+
+    while (!stack.empty()) {
+        int top = stack.back();
+        stack.pop_back();
+        for (int eps_state : nfa[top].e) {
+            if (closure.insert(eps_state).second) {
+                stack.push_back(eps_state);
+            }
+        }
+    }
+
+    return closure;
 }
 
+// Matching function
+bool re_match_check(const std::string& test_string) {
+    // Calculate the initial epsilon-closure from the initial state
+    std::set<int> current_states = epsilon_closure({initial_state});
+
+    for (char c : test_string) {
+        if (c < 'a' || c > 'z') { // Validate character
+            return false;
+        }
+
+        std::set<int> next_states;
+        // Transition based on the character and calculate new states
+        for (int state : current_states) {
+            const auto& transitions = nfa[state].a[c - 'a'];
+            for (int next : transitions) {
+                next_states.insert(next);
+            }
+        }
+
+        // Calculate epsilon-closure for the states reached by the current character
+        current_states = epsilon_closure(next_states);
+    }
+
+    // Check if any current states are final states
+    for (int state : current_states) {
+        if (nfa[state].f) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 void solve() {
     clear();
