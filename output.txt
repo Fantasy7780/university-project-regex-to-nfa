@@ -1,0 +1,36 @@
+..........................................
+Regular expression: a*b
+Postfix expression: a*b.
+Regular expression to NFA: 
+States = {A, B, C, D, E, F};
+Inputs = {a, b};
+Transition functions: f(A, a) = B, f(B, ε) = A, f(B, ε) = D, f(C, ε) = A, f(C, ε) = D, f(D, ε) = E, f(E, b) = F;
+Initial state = C;
+Final state = {F};
+
+String "aaab" matches: No
+String "bbaa" matches: No
+..........................................
+Regular expression: (ab)*ab*
+Postfix expression: ab.*a.b*.
+Regular expression to NFA: 
+States = {A, B, C, D, E, F, G, H, I, J, K, L};
+Inputs = {a, b};
+Transition functions: f(A, a) = B, f(B, ε) = C, f(C, b) = D, f(D, ε) = A, f(D, ε) = F, f(E, ε) = A, f(E, ε) = F, f(F, ε) = G, f(G, a) = H, f(H, ε) = K, f(I, b) = J, f(J, ε) = I, f(J, ε) = L, f(K, ε) = I, f(K, ε) = L;
+Initial state = E;
+Final state = {L};
+
+String "ababa" matches: No
+String "ababab" matches: No
+..........................................
+Regular expression: Aaab*
+Invalid character: Only lowercase letters 'a' to 'z' are allowed.
+..........................................
+Regular expression: a)(ab*
+Unmatched ')': No corresponding opening parenthesis.
+..........................................
+Regular expression: a)ac
+Unmatched ')': No corresponding opening parenthesis.
+..........................................
+Regular expression: a***
+Invalid placement of '*': Consecutive asterisks are not allowed.

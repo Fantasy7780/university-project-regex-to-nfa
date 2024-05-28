@@ -288,7 +288,7 @@ string regular_expression_syntax_check(const string& expression) {
     stack<char> parentheses;
     bool last_is_operator = true;  // Start true to prevent leading '|'
     bool last_is_letter = false;
-    int consecutive_asterisks = 0;  // Counter for consecutive asterisks
+    int consecutive_stars = 0;  // Counter for consecutive asterisks
 
     for (int i = 0; i < expression.length(); i++) {
         char c = expression[i];
@@ -301,7 +301,7 @@ string regular_expression_syntax_check(const string& expression) {
                 parentheses.push(c);
                 last_is_operator = true;
                 last_is_letter = false;
-                consecutive_asterisks = 0;
+                consecutive_stars = 0;
                 break;
 
             case ')':
@@ -314,15 +314,15 @@ string regular_expression_syntax_check(const string& expression) {
                 parentheses.pop();
                 last_is_operator = false;
                 last_is_letter = true;
-                consecutive_asterisks = 0;
+                consecutive_stars = 0;
                 break;
 
             case '*':
-                consecutive_asterisks++;
-                if (last_is_operator || consecutive_asterisks > 1) {
+                consecutive_stars++;
+                if (last_is_operator || consecutive_stars > 1) {
                     return "Invalid placement of '*': Consecutive asterisks are not allowed.";
                 }
-                // Correctly allow '*' after a letter or after ')'
+                // Allow '*' after a letter or after ')'
                 if (!last_is_letter && (parentheses.empty() || expression[i-1] != ')')) {
                     return "Invalid placement of '*': It can only follow a letter or a closed parenthesis.";
                 }
@@ -336,7 +336,7 @@ string regular_expression_syntax_check(const string& expression) {
                 }
                 last_is_operator = true;
                 last_is_letter = false;
-                consecutive_asterisks = 0;
+                consecutive_stars = 0;
                 break;
 
             default:
@@ -345,7 +345,7 @@ string regular_expression_syntax_check(const string& expression) {
                 }
                 last_is_operator = false;
                 last_is_letter = true;
-                consecutive_asterisks = 0;  // Reset on encountering a valid character
+                consecutive_stars = 0;  // Reset on encountering a valid character
                 break;
         }
     }
