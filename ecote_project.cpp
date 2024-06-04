@@ -83,7 +83,7 @@ string regular_expression_syntax_check(const string& expression) {
                 if (!last_is_letter && (parentheses.empty() || expression[i-1] != ')')) {
                     return "Invalid placement of '*': It can only follow a letter or a closed parenthesis.";
                 }
-                last_is_operator = true;
+                last_is_operator = false;
                 last_is_letter = false;
                 break;
 
