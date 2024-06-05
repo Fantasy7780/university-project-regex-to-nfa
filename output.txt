@@ -1,0 +1,111 @@
+..........................................
+Regular expression: a*b
+Postfix expression: a*b.
+Regular expression to NFA: 
+States = {A, B, C, D, E, F};
+Inputs = {a, b};
+Transition functions: f(A, a) = B, f(B, ε) = A, f(B, ε) = D, f(C, ε) = A, f(C, ε) = D, f(D, ε) = E, f(E, b) = F;
+Initial state = C;
+Final state = {F};
+
+String "aaab" matches: Yes
+String "bbaa" matches: No
+..........................................
+Regular expression: (ab)*ab*
+Postfix expression: ab.*a.b*.
+Regular expression to NFA: 
+States = {A, B, C, D, E, F, G, H, I, J, K, L};
+Inputs = {a, b};
+Transition functions: f(A, a) = B, f(B, ε) = C, f(C, b) = D, f(D, ε) = A, f(D, ε) = F, f(E, ε) = A, f(E, ε) = F, f(F, ε) = G, f(G, a) = H, f(H, ε) = K, f(I, b) = J, f(J, ε) = I, f(J, ε) = L, f(K, ε) = I, f(K, ε) = L;
+Initial state = E;
+Final state = {L};
+
+String "ababa" matches: Yes
+String "ababab" matches: Yes
+..........................................
+Regular expression: a*b
+Postfix expression: a*b.
+Regular expression to NFA: 
+States = {A, B, C, D, E, F};
+Inputs = {a, b};
+Transition functions: f(A, a) = B, f(B, ε) = A, f(B, ε) = D, f(C, ε) = A, f(C, ε) = D, f(D, ε) = E, f(E, b) = F;
+Initial state = C;
+Final state = {F};
+
+String "aaabb" matches: No
+String "baa" matches: No
+..........................................
+Regular expression: a*|b*
+Postfix expression: a*b*|
+Regular expression to NFA: 
+States = {A, B, C, D, E, F, G, H, I, J};
+Inputs = {a, b};
+Transition functions: f(A, a) = B, f(B, ε) = A, f(B, ε) = D, f(C, ε) = A, f(C, ε) = D, f(D, ε) = J, f(E, b) = F, f(F, ε) = E, f(F, ε) = H, f(G, ε) = E, f(G, ε) = H, f(H, ε) = J, f(I, ε) = C, f(I, ε) = G;
+Initial state = I;
+Final state = {J};
+
+..........................................
+Regular expression: a|b*
+Postfix expression: ab*|
+Regular expression to NFA: 
+States = {A, B, C, D, E, F, G, H};
+Inputs = {a, b};
+Transition functions: f(A, a) = B, f(B, ε) = H, f(C, b) = D, f(D, ε) = C, f(D, ε) = F, f(E, ε) = C, f(E, ε) = F, f(F, ε) = H, f(G, ε) = A, f(G, ε) = E;
+Initial state = G;
+Final state = {H};
+
+..........................................
+Regular expression: (ab)*b
+Postfix expression: ab.*b.
+Regular expression to NFA: 
+States = {A, B, C, D, E, F, G, H};
+Inputs = {a, b};
+Transition functions: f(A, a) = B, f(B, ε) = C, f(C, b) = D, f(D, ε) = A, f(D, ε) = F, f(E, ε) = A, f(E, ε) = F, f(F, ε) = G, f(G, b) = H;
+Initial state = E;
+Final state = {H};
+
+..........................................
+Regular expression: ba*|(ab)
+Postfix expression: ba*.ab.|
+Regular expression to NFA: 
+States = {A, B, C, D, E, F, G, H, I, J, K, L};
+Inputs = {a, b};
+Transition functions: f(A, b) = B, f(B, ε) = E, f(C, a) = D, f(D, ε) = C, f(D, ε) = F, f(E, ε) = C, f(E, ε) = F, f(F, ε) = L, f(G, a) = H, f(H, ε) = I, f(I, b) = J, f(J, ε) = L, f(K, ε) = A, f(K, ε) = G;
+Initial state = K;
+Final state = {L};
+
+..........................................
+Regular expression: ((a*)*)*
+Postfix expression: a***
+Regular expression to NFA: 
+States = {A, B, C, D, E, F, G, H};
+Inputs = {a};
+Transition functions: f(A, a) = B, f(B, ε) = A, f(B, ε) = D, f(C, ε) = A, f(C, ε) = D, f(D, ε) = C, f(D, ε) = F, f(E, ε) = C, f(E, ε) = F, f(F, ε) = E, f(F, ε) = H, f(G, ε) = E, f(G, ε) = H;
+Initial state = G;
+Final state = {H};
+
+..........................................
+Regular expression: (a*|b*)*
+Postfix expression: a*b*|*
+Regular expression to NFA: 
+States = {A, B, C, D, E, F, G, H, I, J, K, L};
+Inputs = {a, b};
+Transition functions: f(A, a) = B, f(B, ε) = A, f(B, ε) = D, f(C, ε) = A, f(C, ε) = D, f(D, ε) = J, f(E, b) = F, f(F, ε) = E, f(F, ε) = H, f(G, ε) = E, f(G, ε) = H, f(H, ε) = J, f(I, ε) = C, f(I, ε) = G, f(J, ε) = I, f(J, ε) = L, f(K, ε) = I, f(K, ε) = L;
+Initial state = K;
+Final state = {L};
+
+..........................................
+Regular expression: a(ac
+Unmatched '(': Not all opening parentheses have a matching closing parenthesis.
+..........................................
+Regular expression: b)
+Unmatched ')': No corresponding opening parenthesis.
+..........................................
+Regular expression: Aaab*
+Invalid character: Only lowercase letters 'a' to 'z' are allowed.
+..........................................
+Regular expression: a)(ab*
+Unmatched ')': No corresponding opening parenthesis.
+..........................................
+Regular expression: a***
+Invalid placement of '*': Consecutive stars are not allowed.
